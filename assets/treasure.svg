@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Treasure chest">
+  <!-- sparkle -->
+  <path d="M80 8 L83 17 L92 20 L83 23 L80 32 L77 23 L68 20 L77 17 Z" fill="#fde68a" stroke="#b45309" stroke-width="1.5"/>
+  <!-- lid -->
+  <path d="M14 44 Q14 22 50 22 Q86 22 86 44 Z" fill="#d97706" stroke="#78350f" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M30 26 L30 44 M70 26 L70 44" stroke="#facc15" stroke-width="6"/>
+  <!-- coins peeking -->
+  <ellipse cx="38" cy="46" rx="8" ry="4" fill="#fde047" stroke="#a16207" stroke-width="2"/>
+  <ellipse cx="60" cy="46" rx="8" ry="4" fill="#fde047" stroke="#a16207" stroke-width="2"/>
+  <!-- box -->
+  <rect x="14" y="44" width="72" height="40" rx="5" fill="#b45309" stroke="#78350f" stroke-width="4"/>
+  <path d="M30 44 L30 84 M70 44 L70 84" stroke="#facc15" stroke-width="6"/>
+  <!-- lock -->
+  <rect x="42" y="50" width="16" height="18" rx="4" fill="#facc15" stroke="#78350f" stroke-width="3"/>
+  <circle cx="50" cy="58" r="2.6" fill="#78350f"/>
+</svg>

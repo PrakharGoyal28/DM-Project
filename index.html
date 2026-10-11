@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Robot Maze Challenge</title>
+  <meta name="description" content="A maze game for ages 7–11 that teaches graphs, paths, shortest paths and Breadth-First Search.">
+  <link rel="icon" href="assets/robot.svg" type="image/svg+xml">
+  <!-- Nunito is optional: if offline, the rounded system-font fallbacks in style.css are used. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Icon sprite (paths adapted from the open-source Lucide icon set, ISC licence). -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="i-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></symbol>
+      <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></symbol>
+      <symbol id="i-left" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+      <symbol id="i-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+      <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+      <symbol id="i-restart" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></symbol>
+      <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></symbol>
+      <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></symbol>
+      <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><path d="M6 3l14 9-14 9z"/></symbol>
+      <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></symbol>
+      <symbol id="i-book" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+      <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
+      <symbol id="i-sound" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></symbol>
+      <symbol id="i-mute" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="m22 9-6 6"/><path d="m16 9 6 6"/></symbol>
+      <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+      <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0z"/></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></symbol>
+      <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></symbol>
+      <symbol id="i-gem" viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+      <symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></symbol>
+      <symbol id="i-bot" viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></symbol>
+      <symbol id="i-graph" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98"/><path d="m15.41 6.51-6.82 3.98"/></symbol>
+      <symbol id="i-grid" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></symbol>
+      <symbol id="i-step" viewBox="0 0 24 24"><path d="M5 4l10 8-10 8z"/><path d="M19 5v14"/></symbol>
+      <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></symbol>
+      <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 2 10 5-10 5L2 7z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></symbol>
+      <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></symbol>
+      <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"/><path d="m18 2 4 4-4 4"/><path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2"/><path d="M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8"/><path d="m18 14 4 4-4 4"/></symbol>
+      <symbol id="i-back" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+      <symbol id="i-table" viewBox="0 0 24 24"><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></symbol>
+      <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3l1.9 5.8L20 10l-6.1 1.9L12 18l-1.9-6.1L4 10l6.1-1.2z"/><path d="M19 17v4"/><path d="M17 19h4"/></symbol>
+      <symbol id="i-brick" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M2 12h20"/><path d="M12 4v8"/><path d="M7 12v8"/><path d="M17 12v8"/></symbol>
+    </defs>
+  </svg>
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="topbar">
+    <button class="brand" type="button" data-nav="home" aria-label="Robot Maze Challenge home">
+      <img src="assets/robot.svg" alt="" class="brand-robot">
+      <span class="brand-text">Robot Maze</span>
+    </button>
+    <nav class="topnav" aria-label="Main">
+      <button type="button" data-nav="levels"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg><span>Play</span></button>
+      <button type="button" data-nav="learn"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg><span>Learn</span></button>
+      <button type="button" data-nav="detective"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><span>Detective</span></button>
+      <button type="button" data-nav="data"><svg class="icon" aria-hidden="true"><use href="#i-table"/></svg><span>Results</span></button>
+      <button type="button" data-nav="howto"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg><span>Help</span></button>
+    </nav>
+    <button type="button" class="sound-toggle" id="sound-toggle" aria-pressed="false">
+      <svg class="icon" aria-hidden="true"><use href="#i-mute"/></svg><span class="sound-label">Sound off</span>
+    </button>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <noscript><p class="noscript">Robot Maze Challenge needs JavaScript turned on to play.</p></noscript>
+
+    <!-- ===================== HOME ===================== -->
+    <section class="screen" id="screen-home" data-screen="home" aria-labelledby="home-title">
+      <div class="hero">
+        <div class="hero-text">
+          <p class="eyebrow"><svg class="icon" aria-hidden="true"><use href="#i-sparkle"/></svg> A maths adventure</p>
+          <h1 id="home-title" class="game-title">
+            <span class="title-line">ROBOT MAZE</span>
+            <span class="title-line title-accent">CHALLENGE</span>
+          </h1>
+          <p class="subtitle">Think like a robot. Discover the shortest path!</p>
+          <div class="hero-buttons">
+            <button type="button" class="btn btn-primary btn-xl" data-nav="levels">
+              <svg class="icon" aria-hidden="true"><use href="#i-play"/></svg> PLAY NOW
+            </button>
+            <button type="button" class="btn btn-secondary btn-xl" data-nav="learn">
+              <svg class="icon" aria-hidden="true"><use href="#i-book"/></svg> LEARN THE MATH
+            </button>
+            <button type="button" class="btn btn-ghost btn-xl" data-nav="howto">
+              <svg class="icon" aria-hidden="true"><use href="#i-help"/></svg> HOW TO PLAY
+            </button>
+          </div>
+        </div>
+        <div class="hero-art">
+          <div class="speech-bubble">Hi! I'm <strong>Robo</strong>. Help me find the treasure!</div>
+          <img src="assets/robot.svg" alt="Robo, a friendly blue robot, waving" class="hero-robot">
+          <div class="preview-card">
+            <div id="home-preview" class="preview-board"></div>
+            <p class="preview-caption">Robo follows a shortest path found by BFS</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="progress-strip" aria-label="Your progress">
+        <div class="stat-card"><svg class="icon stat-icon c-green" aria-hidden="true"><use href="#i-check"/></svg><span class="stat-value" id="home-levels">0</span><span class="stat-label">Levels completed</span></div>
+        <div class="stat-card"><svg class="icon stat-icon c-purple" aria-hidden="true"><use href="#i-trophy"/></svg><span class="stat-value" id="home-score">0</span><span class="stat-label">Best score</span></div>
+        <div class="stat-card"><svg class="icon stat-icon c-blue" aria-hidden="true"><use href="#i-flag"/></svg><span class="stat-value" id="home-current">1</span><span class="stat-label">Current level</span></div>
+        <div class="stat-card"><svg class="icon stat-icon c-gold" aria-hidden="true"><use href="#i-star"/></svg><span class="stat-value" id="home-stars">0</span><span class="stat-label">Stars collected</span></div>
+      </div>
+
+      <div class="home-actions">
+        <button type="button" class="btn btn-success" id="home-continue">
+          <svg class="icon" aria-hidden="true"><use href="#i-play"/></svg> <span id="home-continue-label">Start Level 1</span>
+        </button>
+        <button type="button" class="btn btn-ghost btn-small" id="reset-progress">
+          <svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg> Reset progress
+        </button>
+      </div>
+
+      <div class="mode-cards">
+        <article class="mode-card">
+          <svg class="icon mode-icon c-blue" aria-hidden="true"><use href="#i-flag"/></svg>
+          <h2>Adventure</h2>
+          <p>12 mazes from easy to tricky. Unlock them one by one!</p>
+          <button type="button" class="btn btn-small btn-primary" data-open-mode="campaign">Play Adventure</button>
+        </article>
+        <article class="mode-card">
+          <svg class="icon mode-icon c-purple" aria-hidden="true"><use href="#i-zap"/></svg>
+          <h2>Robot Race</h2>
+          <p>You go first, then the BFS robot. Who finds the shorter path?</p>
+          <button type="button" class="btn btn-small btn-secondary" data-open-mode="versus">Race the Robot</button>
+        </article>
+        <article class="mode-card">
+          <svg class="icon mode-icon c-green" aria-hidden="true"><use href="#i-route"/></svg>
+          <h2>Free Play</h2>
+          <p>Any maze, any time. Reveal the shortest path and compare.</p>
+          <button type="button" class="btn btn-small btn-success" data-open-mode="sandbox">Try Free Play</button>
+        </article>
+        <article class="mode-card">
+          <svg class="icon mode-icon c-gold" aria-hidden="true"><use href="#i-search"/></svg>
+          <h2>Math Detective</h2>
+          <p>Build walls, test ideas and write down what you discover.</p>
+          <button type="button" class="btn btn-small btn-gold" data-nav="detective">Be a Detective</button>
+        </article>
+      </div>
+    </section>
+
+    <!-- ===================== LEVEL SELECT ===================== -->
+    <section class="screen" id="screen-levels" data-screen="levels" aria-labelledby="levels-title" hidden>
+      <div class="screen-head">
+        <h1 id="levels-title">Choose a Maze</h1>
+        <p class="lead" id="mode-description"></p>
+      </div>
+      <div class="mode-tabs" role="group" aria-label="Game mode">
+        <button type="button" class="mode-tab" data-mode="campaign" aria-pressed="true">
+          <svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg> Adventure
+        </button>
+        <button type="button" class="mode-tab" data-mode="versus" aria-pressed="false">
+          <svg class="icon" aria-hidden="true"><use href="#i-zap"/></svg> Robot Race
+        </button>
+        <button type="button" class="mode-tab" data-mode="sandbox" aria-pressed="false">
+          <svg class="icon" aria-hidden="true"><use href="#i-route"/></svg> Free Play
+        </button>
+      </div>
+      <div id="level-groups"></div>
+    </section>
+
+    <!-- ===================== GAME ===================== -->
+    <section class="screen" id="screen-game" data-screen="game" aria-labelledby="game-level-title" hidden>
+      <div class="game-layout">
+        <div class="game-main">
+          <div class="game-header">
+            <button type="button" class="btn btn-ghost btn-icon" data-nav="levels" aria-label="Back to level selection">
+              <svg class="icon" aria-hidden="true"><use href="#i-back"/></svg>
+            </button>
+            <div class="game-titles">
+              <h1 id="game-level-title">Level 1</h1>
+              <div class="badges">
+                <span class="badge" id="game-difficulty">Beginner</span>
+                <span class="badge badge-mode" id="game-mode">Adventure</span>
+              </div>
+            </div>
+          </div>
+          <p class="objective" id="game-objective"><svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg> <span></span></p>
+          <div class="race-banner" id="race-banner" hidden></div>
+          <div class="board-wrap" id="game-board"></div>
+          <p class="game-message" id="game-message" role="status" aria-live="polite"></p>
+        </div>
+
+        <aside class="game-side" aria-label="Level information and controls">
+          <div class="side-stats">
+            <div class="mini-stat"><svg class="icon" aria-hidden="true"><use href="#i-route"/></svg><span class="mini-label">Moves</span><span class="mini-value" id="g-moves">0</span></div>
+            <div class="mini-stat"><svg class="icon" aria-hidden="true"><use href="#i-bot"/></svg><span class="mini-label">Shortest possible</span><span class="mini-value" id="g-shortest">–</span></div>
+            <div class="mini-stat"><svg class="icon" aria-hidden="true"><use href="#i-gem"/></svg><span class="mini-label">Gems</span><span class="mini-value" id="g-gems">0 / 0</span></div>
+            <div class="mini-stat"><svg class="icon" aria-hidden="true"><use href="#i-bulb"/></svg><span class="mini-label">Hints used</span><span class="mini-value" id="g-hints">0</span></div>
+            <div class="mini-stat" id="g-time-wrap" hidden><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><span class="mini-label">Time</span><span class="mini-value" id="g-time">0:00</span></div>
+          </div>
+          <div class="limit-meter" id="limit-meter" hidden>
+            <div class="limit-text"><span>Move limit</span><span id="limit-count">0 / 0</span></div>
+            <div class="limit-track"><div class="limit-fill" id="limit-fill"></div></div>
+          </div>
+
+          <div class="dpad" role="group" aria-label="Move Robo">
+            <button type="button" class="dpad-btn dpad-up" data-move="up" aria-label="Up"><svg class="icon" aria-hidden="true"><use href="#i-up"/></svg><span>UP</span></button>
+            <button type="button" class="dpad-btn dpad-left" data-move="left" aria-label="Left"><svg class="icon" aria-hidden="true"><use href="#i-left"/></svg><span>LEFT</span></button>
+            <img class="dpad-center" src="assets/robot.svg" alt="">
+            <button type="button" class="dpad-btn dpad-right" data-move="right" aria-label="Right"><svg class="icon" aria-hidden="true"><use href="#i-right"/></svg><span>RIGHT</span></button>
+            <button type="button" class="dpad-btn dpad-down" data-move="down" aria-label="Down"><svg class="icon" aria-hidden="true"><use href="#i-down"/></svg><span>DOWN</span></button>
+          </div>
+
+          <div class="action-buttons">
+            <button type="button" class="btn btn-ghost" id="btn-undo"><svg class="icon" aria-hidden="true"><use href="#i-undo"/></svg> Undo move</button>
+            <button type="button" class="btn btn-ghost" id="btn-restart"><svg class="icon" aria-hidden="true"><use href="#i-restart"/></svg> Restart level</button>
+            <button type="button" class="btn btn-gold" id="btn-hint"><svg class="icon" aria-hidden="true"><use href="#i-bulb"/></svg> Get a hint</button>
+            <button type="button" class="btn btn-secondary" id="btn-showpath" aria-pressed="false" hidden><svg class="icon" aria-hidden="true"><use href="#i-eye"/></svg> <span>Discover the shortest path</span></button>
+          </div>
+          <p class="side-note" id="side-note"></p>
+          <div class="discover-panel" id="discover-panel" hidden></div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ===================== LEARN ===================== -->
+    <section class="screen" id="screen-learn" data-screen="learn" aria-labelledby="learn-title" hidden>
+      <div class="screen-head">
+        <h1 id="learn-title">The Secret Mathematics of Mazes</h1>
+        <p class="lead">Every maze hides a picture made of dots and lines. Let's find it, and learn how a computer finds the shortest way through.</p>
+      </div>
+      <nav class="chip-nav" aria-label="Lessons">
+        <a href="#learn-graphs" class="chip">A. Graphs</a>
+        <a href="#learn-paths" class="chip">B. Paths</a>
+        <a href="#learn-shortest" class="chip">C. Shortest path</a>
+        <a href="#learn-bfs" class="chip">D. BFS</a>
+        <a href="#learn-why" class="chip">E. Why BFS works</a>
+        <a href="#learn-costs" class="chip">F. Careful!</a>
+        <a href="#learn-proof" class="chip">The big claim</a>
+      </nav>
+
+      <article class="lesson" id="learn-graphs">
+        <h2><span class="lesson-letter">A</span> Graphs: dots and lines</h2>
+        <div class="lesson-grid">
+          <div class="lesson-text">
+            <p>A <strong>graph</strong> is a set of points joined by lines. Mathematicians call the points <strong>vertices</strong> and the lines <strong>edges</strong>.</p>
+            <ul class="fact-list">
+              <li><span class="dot-swatch" aria-hidden="true"></span><span>Each open square is a <strong>vertex</strong>.</span></li>
+              <li><span class="line-swatch" aria-hidden="true"></span><span>Each move between two neighbouring open squares (up, down, left or right) is an <strong>edge</strong>.</span></li>
+              <li><span class="wall-swatch" aria-hidden="true"></span><span>Walls are not vertices, so no edges touch them.</span></li>
+            </ul>
+            <p>Switch views to see the hidden graph inside the maze!</p>
+            <div class="toggle-group" role="group" aria-label="Choose a view">
+              <button type="button" class="toggle" data-graph-view="maze" aria-pressed="true"><svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg> Maze view</button>
+              <button type="button" class="toggle" data-graph-view="graph" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-graph"/></svg> Graph view</button>
+              <button type="button" class="toggle" data-graph-view="both" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg> Both</button>
+            </div>
+            <p class="count-line" id="graph-counts"></p>
+          </div>
+          <div class="lesson-figure"><div id="graph-demo" class="demo-board"></div></div>
+        </div>
+      </article>
+
+      <article class="lesson" id="learn-paths">
+        <h2><span class="lesson-letter">B</span> Paths: one step at a time</h2>
+        <div class="lesson-grid">
+          <div class="lesson-text">
+            <p>A <strong>path</strong> is a list of squares where each square is a neighbour of the one before it. In graph words: you can only travel along edges.</p>
+            <p>Walls break the connection between squares, so a path can never jump through a wall or skip a square.</p>
+            <div class="toggle-group" role="group" aria-label="Choose an example path">
+              <button type="button" class="toggle" data-path-example="1" aria-pressed="true">Path 1</button>
+              <button type="button" class="toggle" data-path-example="2" aria-pressed="false">Path 2</button>
+            </div>
+            <p class="question">Is this path allowed?</p>
+            <div class="answer-buttons">
+              <button type="button" class="btn btn-success btn-small" data-path-answer="yes"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg> Yes, allowed</button>
+              <button type="button" class="btn btn-danger btn-small" data-path-answer="no"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg> No, not allowed</button>
+            </div>
+            <p class="feedback" id="paths-feedback" role="status" aria-live="polite"></p>
+          </div>
+          <div class="lesson-figure"><div id="paths-demo" class="demo-board"></div></div>
+        </div>
+      </article>
+
+      <article class="lesson" id="learn-shortest">
+        <h2><span class="lesson-letter">C</span> The shortest path</h2>
+        <div class="lesson-grid">
+          <div class="lesson-text">
+            <p>Lots of paths can lead to the treasure. The <strong>shortest path</strong> is the one that uses the <strong>fewest moves</strong>.</p>
+            <p>Look at <span class="route-tag route-a">Route A</span> (orange dashes) and <span class="route-tag route-b">Route B</span> (blue line). <strong>Predict:</strong> which one is shorter?</p>
+            <div class="answer-buttons">
+              <button type="button" class="btn btn-small btn-orange" data-predict="A">Route A is shorter</button>
+              <button type="button" class="btn btn-small btn-primary" data-predict="B">Route B is shorter</button>
+            </div>
+            <p class="feedback" id="shortest-feedback" role="status" aria-live="polite"></p>
+            <button type="button" class="btn btn-ghost btn-small" id="shortest-reset" hidden><svg class="icon" aria-hidden="true"><use href="#i-restart"/></svg> Try again</button>
+          </div>
+          <div class="lesson-figure"><div id="shortest-demo" class="demo-board"></div></div>
+        </div>
+      </article>
+
+      <article class="lesson" id="learn-bfs">
+        <h2><span class="lesson-letter">D</span> Breadth-First Search (BFS)</h2>
+        <div class="lesson-grid">
+          <div class="lesson-text">
+            <p class="analogy"><svg class="icon" aria-hidden="true"><use href="#i-sparkle"/></svg> Imagine dropping a pebble in water. The ripples spread outward in all directions. BFS explores nearby places first, then places farther away.</p>
+            <ol class="step-list">
+              <li>Start at the robot.</li>
+              <li>Explore all the neighbouring squares you can reach.</li>
+              <li>Explore the next layer of squares.</li>
+              <li>Keep going until the treasure is reached.</li>
+            </ol>
+            <p>BFS keeps a waiting line called a <strong>queue</strong>: first in, first out, just like a line at the school canteen.</p>
+            <div class="control-row">
+              <button type="button" class="btn btn-primary btn-small" id="bfs-step"><svg class="icon" aria-hidden="true"><use href="#i-step"/></svg> Step</button>
+              <button type="button" class="btn btn-secondary btn-small" id="bfs-play" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg> <span>Play</span></button>
+              <button type="button" class="btn btn-ghost btn-small" id="bfs-reset"><svg class="icon" aria-hidden="true"><use href="#i-restart"/></svg> Reset</button>
+            </div>
+            <p class="feedback bfs-explain" id="bfs-explain" role="status" aria-live="polite"></p>
+            <dl class="bfs-status">
+              <div><dt>Current square</dt><dd id="bfs-current">–</dd></div>
+              <div><dt>Visited squares</dt><dd id="bfs-visited">0</dd></div>
+              <div><dt>Frontier (queue)</dt><dd id="bfs-frontier" class="queue-chips">–</dd></div>
+              <div><dt>Path found</dt><dd id="bfs-path">Not yet</dd></div>
+            </dl>
+          </div>
+          <div class="lesson-figure">
+            <div id="bfs-demo" class="demo-board"></div>
+            <ul class="legend" aria-label="Legend">
+              <li><span class="legend-swatch sw-current" aria-hidden="true"></span> Current square (being looked at)</li>
+              <li><span class="legend-swatch sw-frontier" aria-hidden="true"></span> Frontier: waiting in the queue</li>
+              <li><span class="legend-swatch sw-visited" aria-hidden="true"></span> Visited (number = moves from start)</li>
+              <li><span class="legend-swatch sw-path" aria-hidden="true"></span> Shortest path found</li>
+              <li><span class="legend-swatch sw-wall" aria-hidden="true"></span> Wall (never visited)</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="lesson" id="learn-why">
+        <h2><span class="lesson-letter">E</span> Why BFS finds a shortest path</h2>
+        <div class="lesson-grid">
+          <div class="lesson-text">
+            <p class="big-quote">BFS explores all places <strong>one move</strong> away before places <strong>two moves</strong> away, all places two moves away before places <strong>three moves</strong> away, and so on.</p>
+            <p>So the <em>first</em> time BFS reaches the treasure, there cannot be a shorter way. A shorter way would have been found in an earlier ripple! This works when every move costs the same.</p>
+            <label class="range-label" for="ripple-range">Ripple number (moves from Robo): <strong id="ripple-value">0</strong></label>
+            <input type="range" id="ripple-range" min="0" max="10" value="0" step="1">
+            <div class="control-row">
+              <button type="button" class="btn btn-ghost btn-small" id="ripple-prev"><svg class="icon" aria-hidden="true"><use href="#i-left"/></svg> Smaller ripple</button>
+              <button type="button" class="btn btn-primary btn-small" id="ripple-next">Next ripple <svg class="icon" aria-hidden="true"><use href="#i-right"/></svg></button>
+            </div>
+            <p class="feedback" id="ripple-explain" role="status" aria-live="polite"></p>
+          </div>
+          <div class="lesson-figure"><div id="ripple-demo" class="demo-board"></div></div>
+        </div>
+      </article>
+
+      <article class="lesson" id="learn-costs">
+        <h2><span class="lesson-letter">F</span> Careful! When moves cost different amounts</h2>
+        <div class="lesson-grid">
+          <div class="lesson-text">
+            <p>BFS finds the path with the <strong>fewest moves</strong>. That is the same as the <em>cheapest</em> path only when <strong>every move costs the same</strong>.</p>
+            <p>Imagine some squares are sticky mud that takes 5 seconds to cross, and road squares take 1 second. Which route is best?</p>
+            <div class="toggle-group" role="group" aria-label="What should we count?">
+              <button type="button" class="toggle" data-cost-mode="moves" aria-pressed="true">Count moves</button>
+              <button type="button" class="toggle" data-cost-mode="time" aria-pressed="false">Count seconds</button>
+            </div>
+            <p class="feedback" id="cost-feedback" role="status" aria-live="polite"></p>
+            <p class="small-print">When moves have different costs, computer scientists use other algorithms, such as Dijkstra's algorithm. BFS is not the best tool for every maze!</p>
+          </div>
+          <div class="lesson-figure">
+            <svg class="cost-figure" viewBox="0 0 320 200" role="img" aria-labelledby="cost-fig-title">
+              <title id="cost-fig-title">Two routes from Robo to the treasure: a short mud route of 2 moves and a longer road route of 4 moves.</title>
+              <defs>
+                <pattern id="mud-pattern" width="8" height="8" patternUnits="userSpaceOnUse">
+                  <rect width="8" height="8" fill="#a0703c"/><circle cx="4" cy="4" r="1.6" fill="#7a5226"/>
+                </pattern>
+              </defs>
+              <g id="route-mud">
+                <line x1="40" y1="100" x2="160" y2="100" class="cost-edge mud-edge"/>
+                <line x1="160" y1="100" x2="280" y2="100" class="cost-edge mud-edge"/>
+                <rect x="80" y="86" width="40" height="28" rx="6" fill="url(#mud-pattern)"/>
+                <rect x="200" y="86" width="40" height="28" rx="6" fill="url(#mud-pattern)"/>
+                <text x="100" y="80" class="cost-label">mud 5s</text>
+                <text x="220" y="80" class="cost-label">mud 5s</text>
+              </g>
+              <g id="route-road">
+                <polyline points="40,100 40,30 160,30 280,30 280,100" class="cost-edge road-edge"/>
+                <text x="40" y="22" class="cost-label">1s</text>
+                <text x="100" y="22" class="cost-label">1s</text>
+                <text x="220" y="22" class="cost-label">1s</text>
+                <text x="296" y="68" class="cost-label">1s</text>
+              </g>
+              <circle cx="40" cy="100" r="16" class="cost-node start-node"/>
+              <text x="40" y="105" class="cost-node-label">R</text>
+              <circle cx="160" cy="100" r="10" class="cost-node"/>
+              <circle cx="280" cy="100" r="16" class="cost-node goal-node"/>
+              <text x="280" y="105" class="cost-node-label">T</text>
+              <text x="160" y="160" class="cost-caption" id="cost-caption">Mud route: 2 moves · Road route: 4 moves</text>
+            </svg>
+          </div>
+        </div>
+      </article>
+
+      <article class="lesson proof" id="learn-proof">
+        <h2><span class="lesson-letter"><svg class="icon" aria-hidden="true"><use href="#i-trophy"/></svg></span> The big claim (for grown-ups and curious kids)</h2>
+        <div class="conjecture">
+          <p class="label">Conjecture</p>
+          <p>In a maze where every move costs one step, BFS finds a shortest path whenever the destination is reachable.</p>
+        </div>
+        <div class="proof-grid">
+          <div>
+            <h3>Assumptions</h3>
+            <ul>
+              <li>The maze is a graph <em>G = (V, E)</em>: open squares are vertices; orthogonally adjacent open squares are joined by an edge.</li>
+              <li>Movement is restricted to edges (no diagonal moves, no walls).</li>
+              <li>Every edge has the same cost (1 move).</li>
+              <li>The maze is finite and the destination is reachable from the start.</li>
+            </ul>
+            <h3>Definitions</h3>
+            <p>Let <em>dist(v)</em> be the minimum number of moves from the start <em>s</em> to vertex <em>v</em>. Layer <em>L<sub>d</sub></em> is the set of vertices with <em>dist(v) = d</em>. So <em>L<sub>0</sub> = {s}</em>.</p>
+          </div>
+          <div>
+            <h3>Proof</h3>
+            <ol class="proof-steps">
+              <li>Divide the reachable squares into layers <em>L<sub>0</sub>, L<sub>1</sub>, L<sub>2</sub>, …</em> by their minimum distance from the start.</li>
+              <li>The start square is the only square in layer 0, and BFS records it with distance 0.</li>
+              <li><strong>Claim (by induction on d):</strong> BFS dequeues every vertex of <em>L<sub>d</sub></em> before any vertex of <em>L<sub>d+1</sub></em>, and records distance <em>d</em> for each vertex in <em>L<sub>d</sub></em>. Base case: only <em>s</em> is in the queue at first, with distance 0. Inductive step: every vertex <em>w</em> in <em>L<sub>d+1</sub></em> has a neighbour <em>v</em> in <em>L<sub>d</sub></em> (the square just before it on a shortest route). While BFS works through layer <em>d</em>, the first such neighbour to be dequeued discovers <em>w</em> and records distance <em>d+1</em>. <em>w</em> cannot be discovered earlier, because anything dequeued earlier is in a layer ≤ <em>d−1</em>, and a neighbour of such a square is at most distance <em>d</em> away. The queue is first-in-first-out, so all of layer <em>d+1</em> joins the queue behind layer <em>d</em>.</li>
+              <li>Every move between neighbouring squares costs exactly one step, so "distance" and "number of moves" mean the same thing.</li>
+              <li>Therefore each square is first discovered along a path with the minimum possible number of moves, and its parent pointer records the last step of such a path.</li>
+              <li>When BFS first reaches the destination, its recorded distance is <em>dist(destination)</em>. Following parent pointers back gives a path of exactly that many moves: a shortest path. ∎</li>
+            </ol>
+          </div>
+        </div>
+        <div class="proof-grid">
+          <div>
+            <h3>Why the visited set matters</h3>
+            <p>A square is marked visited the moment it is discovered, and is never added to the queue again. That stops BFS from going round in circles and means each square is processed at most once, so the work is proportional to the number of squares plus connections, <em>O(|V| + |E|)</em>.</p>
+            <h3>BFS is complete</h3>
+            <p>A finite maze has finitely many squares and each joins the queue at most once, so BFS always stops. If the destination is reachable, it lies in some layer <em>L<sub>k</sub></em> and is discovered by the claim above. If the queue empties first, the destination is unreachable, and the game reports exactly that.</p>
+          </div>
+          <div>
+            <h3>Proof vs. testing</h3>
+            <p>Testing many mazes builds <strong>confidence that our code is correct</strong>, but no number of tests covers every possible maze. The <strong>proof</strong> is what establishes the general claim. Below, the game checks its BFS against a completely different method: repeatedly relaxing distances until nothing changes, a Bellman–Ford-style computation that uses no queue. This tests the <em>implementation</em>. It does not prove the theorem.</p>
+            <button type="button" class="btn btn-secondary btn-small" id="proof-check-btn"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg> Test BFS on 12 levels + 500 random mazes</button>
+            <p class="feedback" id="proof-check-result" role="status" aria-live="polite"></p>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- ===================== DETECTIVE ===================== -->
+    <section class="screen" id="screen-detective" data-screen="detective" aria-labelledby="detective-title" hidden>
+      <div class="screen-head">
+        <h1 id="detective-title">Be a Math Detective</h1>
+        <p class="lead">Pick an experiment. Make a prediction, try it in the lab, then write down what you discovered.</p>
+      </div>
+      <div class="exp-tabs" role="group" aria-label="Experiments" id="exp-tabs"></div>
+
+      <div class="lab">
+        <div class="lab-main">
+          <div class="lab-question" id="lab-question"></div>
+          <p class="lab-instructions" id="lab-instructions"></p>
+          <div class="toggle-group" role="group" aria-label="What happens when you tap a square">
+            <button type="button" class="toggle" data-lab-tool="walls" aria-pressed="true"><svg class="icon" aria-hidden="true"><use href="#i-brick"/></svg> Tap to build or remove walls</button>
+            <button type="button" class="toggle" data-lab-tool="route" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-pencil"/></svg> Tap to draw my route</button>
+          </div>
+          <div id="lab-board" class="demo-board lab-board"></div>
+          <p class="feedback" id="lab-message" role="status" aria-live="polite"></p>
+        </div>
+        <aside class="lab-side" aria-label="Lab measurements">
+          <dl class="lab-stats">
+            <div><dt>Open squares (vertices)</dt><dd id="lab-open">0</dd></div>
+            <div><dt>Squares Robo can reach</dt><dd id="lab-reach">0</dd></div>
+            <div><dt>Can Robo reach the treasure?</dt><dd id="lab-reachable">–</dd></div>
+            <div><dt>Shortest path (moves)</dt><dd id="lab-shortest">–</dd></div>
+            <div><dt>Number of shortest paths</dt><dd id="lab-count">–</dd></div>
+            <div><dt>My route (moves)</dt><dd id="lab-route">0</dd></div>
+          </dl>
+          <div class="lab-buttons">
+            <button type="button" class="btn btn-secondary btn-small" id="lab-show-path" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-eye"/></svg> <span>Show a BFS shortest path</span></button>
+            <button type="button" class="btn btn-ghost btn-small" id="lab-next-path"><svg class="icon" aria-hidden="true"><use href="#i-shuffle"/></svg> Show another shortest path</button>
+            <button type="button" class="btn btn-ghost btn-small" id="lab-clear-route"><svg class="icon" aria-hidden="true"><use href="#i-undo"/></svg> Clear my route</button>
+            <button type="button" class="btn btn-ghost btn-small" id="lab-reset"><svg class="icon" aria-hidden="true"><use href="#i-restart"/></svg> Reset this maze</button>
+          </div>
+          <div class="lab-extra" id="lab-extra"></div>
+        </aside>
+      </div>
+
+      <section class="observations" aria-labelledby="obs-title">
+        <h2 id="obs-title"><svg class="icon" aria-hidden="true"><use href="#i-pencil"/></svg> My detective notebook</h2>
+        <p class="small-print">Your notes are saved on this device. There are no wrong predictions: detectives change their minds when they find new clues!</p>
+        <div class="table-scroll">
+          <table class="obs-table">
+            <thead><tr><th scope="col">Experiment</th><th scope="col">My prediction</th><th scope="col">What happened</th><th scope="col">What I learned</th></tr></thead>
+            <tbody id="observation-body"></tbody>
+          </table>
+        </div>
+        <div class="control-row">
+          <button type="button" class="btn btn-ghost btn-small" id="export-observations"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg> Download notebook (CSV)</button>
+          <span class="save-status" id="obs-save-status" aria-live="polite"></span>
+        </div>
+      </section>
+    </section>
+
+    <!-- ===================== RESULTS / DATA ===================== -->
+    <section class="screen" id="screen-data" data-screen="data" aria-labelledby="data-title" hidden>
+      <div class="screen-head">
+        <h1 id="data-title">Experimental Results</h1>
+        <p class="lead">Every finished maze is recorded here, on this device only. Use it to collect data for your project.</p>
+      </div>
+      <div class="data-controls">
+        <label for="player-name" class="field-label">Player name or code (optional)</label>
+        <input type="text" id="player-name" maxlength="40" placeholder="e.g. Student A" autocomplete="off">
+        <p class="small-print">Tip: use codes like "S1", "S2" instead of real names to protect children's privacy.</p>
+      </div>
+      <div class="summary-cards" id="results-summary"></div>
+      <p class="caution" role="note"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg> Results from a small number of players are <strong>exploratory</strong>. They can suggest patterns and questions, but they do not prove anything about all children or all mazes.</p>
+      <div class="table-scroll">
+        <table class="results-table">
+          <caption class="sr-only">Recorded maze results</caption>
+          <thead>
+            <tr>
+              <th scope="col">When</th><th scope="col">Player</th><th scope="col">Maze</th><th scope="col">Mode</th>
+              <th scope="col">Open cells</th><th scope="col">Reachable</th><th scope="col">Shortest</th>
+              <th scope="col">Player path</th><th scope="col">Extra</th><th scope="col">Hints</th><th scope="col">Shortest found?</th>
+            </tr>
+          </thead>
+          <tbody id="results-body"></tbody>
+        </table>
+      </div>
+      <div class="control-row">
+        <button type="button" class="btn btn-primary" id="export-results"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg> Export results (CSV)</button>
+        <button type="button" class="btn btn-ghost" id="clear-results"><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg> Clear all results</button>
+      </div>
+    </section>
+
+    <!-- ===================== HOW TO PLAY ===================== -->
+    <section class="screen" id="screen-howto" data-screen="howto" aria-labelledby="howto-title" hidden>
+      <div class="screen-head">
+        <h1 id="howto-title">How to Play</h1>
+        <p class="lead">Guide Robo through the maze to the treasure chest.</p>
+      </div>
+      <div class="howto-grid">
+        <article class="howto-card">
+          <div class="howto-icon"><img src="assets/robot.svg" alt=""></div>
+          <h2>1. Meet Robo</h2>
+          <p>Robo starts on the <strong>flag</strong> square. Your job: reach the <strong>treasure chest</strong>.</p>
+        </article>
+        <article class="howto-card">
+          <div class="howto-icon keys" aria-hidden="true"><kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd></div>
+          <h2>2. Move</h2>
+          <p>Use the <strong>arrow keys</strong>, <strong>W A S D</strong>, the big <strong>arrow buttons</strong>, or <strong>swipe</strong> on the maze.</p>
+        </article>
+        <article class="howto-card">
+          <div class="howto-icon wall-demo" aria-hidden="true"></div>
+          <h2>3. Walls block you</h2>
+          <p>Dark striped squares are walls. Robo can't go through them, and bumping a wall never counts as a move.</p>
+        </article>
+        <article class="howto-card">
+          <div class="howto-icon"><img src="assets/gem.svg" alt=""></div>
+          <h2>4. Bonus gems</h2>
+          <p>Gems are optional extra points. Grabbing one might mean taking a longer route. You decide!</p>
+        </article>
+        <article class="howto-card">
+          <div class="howto-icon"><svg class="icon c-gold" aria-hidden="true"><use href="#i-bulb"/></svg></div>
+          <h2>5. Stuck? Get a hint</h2>
+          <p>Hint 1 gives a tip. Hint 2 makes a square glow. Hint 3 shows a little piece of the path.</p>
+        </article>
+        <article class="howto-card">
+          <div class="howto-icon"><svg class="icon c-gold" aria-hidden="true"><use href="#i-star"/></svg></div>
+          <h2>6. Earn stars</h2>
+          <p><strong>1 star</strong> for reaching the treasure, <strong>+1</strong> for using a shortest path, <strong>+1</strong> for using no hints.</p>
+        </article>
+      </div>
+      <div class="scoring-box">
+        <h2>Points</h2>
+        <ul>
+          <li><strong>100</strong> points for finding the treasure.</li>
+          <li>Up to <strong>50</strong> bonus points for a short route (shortest path = all 50; you lose only 10 per extra move).</li>
+          <li>Up to <strong>30</strong> bonus points for not using hints (10 less for each hint).</li>
+          <li><strong>20</strong> points for every gem.</li>
+          <li><strong>25</strong> points for beating a move limit.</li>
+        </ul>
+        <p>Speed is <strong>never</strong> part of your score. Take your time and explore!</p>
+        <h2>Game modes</h2>
+        <ul>
+          <li><strong>Adventure:</strong> play the 12 levels in order.</li>
+          <li><strong>Robot Race:</strong> you play first, then the BFS robot shows its shortest path.</li>
+          <li><strong>Free Play:</strong> any level, and you can reveal the shortest path whenever you like.</li>
+        </ul>
+        <button type="button" class="btn btn-primary btn-xl" data-nav="levels"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg> Let's play!</button>
+      </div>
+    </section>
+
+    <!-- ===================== GAME COMPLETE ===================== -->
+    <section class="screen" id="screen-complete" data-screen="complete" aria-labelledby="complete-title" hidden>
+      <div class="complete-card">
+        <div class="confetti-zone" aria-hidden="true"></div>
+        <img src="assets/robot.svg" alt="Robo celebrating" class="complete-robot">
+        <h1 id="complete-title" class="game-title">MAZE MASTER!</h1>
+        <p class="lead">You explored the maze, discovered paths, and learned how computers find the shortest route!</p>
+        <div class="progress-strip">
+          <div class="stat-card"><svg class="icon stat-icon c-green" aria-hidden="true"><use href="#i-check"/></svg><span class="stat-value" id="final-levels">0</span><span class="stat-label">Levels completed</span></div>
+          <div class="stat-card"><svg class="icon stat-icon c-gold" aria-hidden="true"><use href="#i-star"/></svg><span class="stat-value" id="final-stars">0</span><span class="stat-label">Total stars earned</span></div>
+          <div class="stat-card"><svg class="icon stat-icon c-purple" aria-hidden="true"><use href="#i-trophy"/></svg><span class="stat-value" id="final-score">0</span><span class="stat-label">Best score</span></div>
+          <div class="stat-card"><svg class="icon stat-icon c-blue" aria-hidden="true"><use href="#i-route"/></svg><span class="stat-value" id="final-shortest">0</span><span class="stat-label">Shortest-path challenges completed</span></div>
+        </div>
+        <p class="small-print">Want to keep exploring? Every maze has more to discover.</p>
+        <div class="hero-buttons centered">
+          <button type="button" class="btn btn-primary btn-xl" id="final-play-again"><svg class="icon" aria-hidden="true"><use href="#i-restart"/></svg> PLAY AGAIN</button>
+          <button type="button" class="btn btn-success btn-xl" id="final-free-play"><svg class="icon" aria-hidden="true"><use href="#i-route"/></svg> TRY FREE PLAY</button>
+          <button type="button" class="btn btn-secondary btn-xl" data-nav="learn"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg> EXPLORE THE MATHEMATICS</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== DIALOGS ===================== -->
+  <dialog class="dialog" id="results-dialog" aria-labelledby="results-title">
+    <div class="dialog-body">
+      <div class="confetti-zone" aria-hidden="true"></div>
+      <img src="assets/robot.svg" alt="" class="dialog-robot">
+      <h2 id="results-title">Amazing! You reached the treasure!</h2>
+      <p class="results-message" id="results-message"></p>
+      <div class="results-stars" id="results-stars"></div>
+      <div class="compare-bars" id="results-compare"></div>
+      <dl class="results-grid" id="results-grid"></dl>
+      <p class="small-print" id="results-note"></p>
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-ghost" id="res-replay"><svg class="icon" aria-hidden="true"><use href="#i-restart"/></svg> Replay level</button>
+        <button type="button" class="btn btn-secondary" id="res-watch"><svg class="icon" aria-hidden="true"><use href="#i-bot"/></svg> Watch the BFS robot</button>
+        <button type="button" class="btn btn-ghost" id="res-levels"><svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg> Level selection</button>
+        <button type="button" class="btn btn-primary" id="res-next"><span>Next level</span> <svg class="icon" aria-hidden="true"><use href="#i-right"/></svg></button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="dialog dialog-small" id="confirm-dialog" aria-labelledby="confirm-title">
+    <form method="dialog" class="dialog-body">
+      <h2 id="confirm-title">Are you sure?</h2>
+      <p id="confirm-text"></p>
+      <div class="dialog-actions">
+        <button type="submit" class="btn btn-ghost" value="cancel" id="confirm-cancel" autofocus>Keep it</button>
+        <button type="submit" class="btn btn-danger" value="ok" id="confirm-ok">Yes, reset</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/bfs.js"></script>
+  <script src="js/levels.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/board.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/learn.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/detective.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
